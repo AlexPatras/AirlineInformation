@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PassengerManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">PassengerManager.java</span></div><h1>PassengerManager.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import java.util.regex.Pattern;
+
+import dataRecords.PassengerData;
+import persistence.DAO;
+import persistence.InputValidationException;
+import persistence.PassengerDAO;
+import persistence.PassengerNonDAO;
+import persistence.PassengerNonDAOImpl;
+import persistence.PassengerPersistenceException;
+
+<span class="fc" id="L13">public class PassengerManager {</span>
+
+<span class="fc" id="L15">    private DAO&lt;PassengerData&gt; passengerDao = new PassengerDAO();</span>
+<span class="fc" id="L16">    private PassengerNonDAO passengerNonDAO = new PassengerNonDAOImpl();</span>
+
+    public void create(Passenger passenger) throws PassengerPersistenceException, InputValidationException {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (passenger.getPassengerData().email().isEmpty()) {</span>
+<span class="fc" id="L20">            throw new InputValidationException(&quot;BL: The email is required.&quot;);</span>
+        }
+
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (!isValidEmail(passenger.getPassengerData().email())) {</span>
+<span class="fc" id="L24">            throw new InputValidationException(&quot;BL: The email must be valid.&quot;);</span>
+        }
+
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (passenger.getPassengerData().firstName().isEmpty()) {</span>
+<span class="fc" id="L28">            throw new InputValidationException(&quot;Please provide first name.&quot;);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        } else if (!passenger.getPassengerData().firstName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="fc" id="L30">            throw new InputValidationException(&quot;Invalid first name. Only letters and hyphens allowed.&quot;);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        } else if (passenger.getPassengerData().firstName().length() &gt; 30) {</span>
+<span class="fc" id="L32">            throw new InputValidationException(&quot;Invalid first name. Too long.&quot;);</span>
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (passenger.getPassengerData().lastName().isEmpty()) {</span>
+<span class="fc" id="L35">            throw new InputValidationException(&quot;Please provide the last name.&quot;);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        } else if (!passenger.getPassengerData().lastName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="fc" id="L37">            throw new InputValidationException(&quot;Invalid last name. Only letters and hyphens allowed.&quot;);</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        } else if (passenger.getPassengerData().lastName().length() &gt; 30) {</span>
+<span class="fc" id="L39">            throw new InputValidationException(&quot;Invalid last name. Too long.&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L43">            passengerDao.create(passenger.getPassengerData());</span>
+<span class="fc" id="L44">        } catch (PassengerPersistenceException e) {</span>
+<span class="fc" id="L45">            throw new PassengerPersistenceException(&quot;BL: Couldn't create passenger.&quot;, e);</span>
+<span class="nc" id="L46">        } catch (Exception e) {</span>
+<span class="nc" id="L47">            throw new PassengerPersistenceException(&quot;BL: Couldn't create passenger.&quot;, e);</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">    }</span>
+
+    public Passenger read(int id) throws PassengerPersistenceException {
+        try {
+<span class="fc" id="L53">            return new Passenger(passengerDao.read(id));</span>
+<span class="fc" id="L54">        } catch (PassengerPersistenceException e) {</span>
+<span class="fc" id="L55">            throw new PassengerPersistenceException(&quot;BL: Couldn't read passenger.&quot;, e);</span>
+<span class="nc" id="L56">        } catch (Exception e) {</span>
+<span class="nc" id="L57">            throw new PassengerPersistenceException(&quot;BL: Couldn't read passenger.&quot;, e);</span>
+        }
+    }
+
+    public void update(Passenger passenger) throws PassengerPersistenceException, InputValidationException {
+
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (passenger.getEmail().isEmpty()) {</span>
+<span class="nc" id="L64">            throw new InputValidationException(&quot;BL: The email is required&quot;);</span>
+        }
+
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (!isValidEmail(passenger.getEmail())) {</span>
+<span class="nc" id="L68">            throw new InputValidationException(&quot;The email must be valid.&quot;);</span>
+        }
+
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (passenger.getFirstName().isEmpty()) {</span>
+<span class="nc" id="L72">            throw new InputValidationException(&quot;Please provide first name.&quot;);</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        } else if (!passenger.getFirstName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L74">            throw new InputValidationException(&quot;Invalid first name. Only letters and hyphens allowed.&quot;);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        } else if (passenger.getFirstName().length() &gt; 30) {</span>
+<span class="nc" id="L76">            throw new InputValidationException(&quot;Invalid first name. Too long.&quot;);</span>
+        }
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (passenger.getLastName().isEmpty()) {</span>
+<span class="nc" id="L79">            throw new InputValidationException(&quot;Please provide the last name.&quot;);</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        } else if (!passenger.getLastName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L81">            throw new InputValidationException(&quot;Invalid last name. Only letters and hyphens allowed.&quot;);</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        } else if (passenger.getLastName().length() &gt; 30) {</span>
+<span class="nc" id="L83">            throw new InputValidationException(&quot;Invalid last name. Too long.&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L87">            passengerDao.update(passenger.getPassengerData());</span>
+<span class="fc" id="L88">        } catch (PassengerPersistenceException e) {</span>
+<span class="fc" id="L89">            throw new PassengerPersistenceException(&quot;BL: Couldn't update passenger.&quot;, e);</span>
+<span class="nc" id="L90">        } catch (Exception e) {</span>
+<span class="nc" id="L91">            throw new PassengerPersistenceException(&quot;BL: Couldn't update passenger&quot;, e);</span>
+<span class="fc" id="L92">        }</span>
+<span class="fc" id="L93">    }</span>
+
+    public int checkForExistingPassenger(Passenger passenger)
+            throws PassengerPersistenceException, InputValidationException {
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (passenger.getEmail().isEmpty()) {</span>
+<span class="nc" id="L98">            throw new InputValidationException(&quot;BL: The email is required&quot;);</span>
+        }
+
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (!isValidEmail(passenger.getEmail())) {</span>
+<span class="nc" id="L102">            throw new InputValidationException(&quot;The email must be valid.&quot;);</span>
+        }
+
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (passenger.getFirstName().isEmpty()) {</span>
+<span class="nc" id="L106">            throw new InputValidationException(&quot;Please provide first name.&quot;);</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        } else if (!passenger.getFirstName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L108">            throw new InputValidationException(&quot;Invalid first name. Only letters and hyphens allowed.&quot;);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        } else if (passenger.getFirstName().length() &gt; 30) {</span>
+<span class="nc" id="L110">            throw new InputValidationException(&quot;Invalid first name. Too long.&quot;);</span>
+        }
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (passenger.getLastName().isEmpty()) {</span>
+<span class="nc" id="L113">            throw new InputValidationException(&quot;Please provide the last name.&quot;);</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        } else if (!passenger.getLastName().matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L115">            throw new InputValidationException(&quot;Invalid last name. Only letters and hyphens allowed.&quot;);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        } else if (passenger.getLastName().length() &gt; 30) {</span>
+<span class="nc" id="L117">            throw new InputValidationException(&quot;Invalid last name. Too long.&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L121">            return passengerNonDAO.checkForExistingPassenger(passenger.getPassengerData());</span>
+<span class="nc" id="L122">        } catch (PassengerPersistenceException e) {</span>
+<span class="nc" id="L123">            throw new PassengerPersistenceException(&quot;BL: Couldn't check for existing passengers.&quot;, e);</span>
+        }
+    }
+
+    public int getNextFreeId() throws PassengerPersistenceException {
+        try {
+<span class="fc" id="L129">            return passengerNonDAO.getNextFreeId();</span>
+<span class="fc" id="L130">        } catch (PassengerPersistenceException e) {</span>
+<span class="fc" id="L131">            throw new PassengerPersistenceException(&quot;BL: Couldn't get next free passenger id.&quot;, e);</span>
+        }
+    }
+
+    public PassengerData create(String firstName, String lastName, String email, String phoneNumber, String nationality,
+            String docNumber, String birthDay) throws PassengerPersistenceException, InputValidationException {
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (email.isEmpty()) {</span>
+<span class="nc" id="L139">            throw new InputValidationException(&quot;BL: The email is required&quot;);</span>
+        }
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (!isValidEmail(email)) {</span>
+<span class="nc" id="L143">            throw new InputValidationException(&quot;The email must be valid.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (firstName.isEmpty()) {</span>
+<span class="nc" id="L147">            throw new InputValidationException(&quot;Please provide first name.&quot;);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        } else if (!firstName.matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L149">            throw new InputValidationException(&quot;Invalid first name. Only letters and hyphens allowed.&quot;);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        } else if (firstName.length() &gt; 30) {</span>
+<span class="nc" id="L151">            throw new InputValidationException(&quot;Invalid first name. Too long.&quot;);</span>
+        }
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (lastName.isEmpty()) {</span>
+<span class="nc" id="L154">            throw new InputValidationException(&quot;Please provide the last name.&quot;);</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        } else if (!lastName.matches(&quot;[a-zA-Z\\-]+&quot;)) {</span>
+<span class="nc" id="L156">            throw new InputValidationException(&quot;Invalid last name. Only letters and hyphens allowed.&quot;);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        } else if (lastName.length() &gt; 30) {</span>
+<span class="nc" id="L158">            throw new InputValidationException(&quot;Invalid last name. Too long.&quot;);</span>
+        }
+
+        try {
+<span class="nc" id="L162">            return passengerNonDAO.create(firstName, lastName, email, phoneNumber, nationality, docNumber, birthDay);</span>
+<span class="nc" id="L163">        } catch (PassengerPersistenceException e) {</span>
+<span class="nc" id="L164">            throw new PassengerPersistenceException(&quot;BL: Couldn't create a new passenger.&quot;, e);</span>
+        }
+    }
+
+    public void setPassengerNonDao(PassengerNonDAO passengerNonDAO) {
+<span class="fc" id="L169">        this.passengerNonDAO = passengerNonDAO;</span>
+<span class="fc" id="L170">    }</span>
+
+    public void setPassengerDao(PassengerDAO passengerDAO) {
+<span class="fc" id="L173">        this.passengerDao = passengerDAO;</span>
+<span class="fc" id="L174">    }</span>
+
+    public static boolean isValidEmail(String email) {
+<span class="fc" id="L177">        String emailRegex = &quot;^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$&quot;;</span>
+<span class="fc" id="L178">        Pattern pattern = Pattern.compile(emailRegex);</span>
+<span class="fc" id="L179">        return pattern.matcher(email).matches();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

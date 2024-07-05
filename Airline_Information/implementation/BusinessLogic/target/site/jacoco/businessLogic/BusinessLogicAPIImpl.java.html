@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessLogicAPIImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">BusinessLogicAPIImpl.java</span></div><h1>BusinessLogicAPIImpl.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import persistence.BookingNonDAO;
+import persistence.PersistenceAPI;
+
+public class BusinessLogicAPIImpl implements BusinessLogicAPI {
+
+    final PersistenceAPI persistenceAPI;
+
+<span class="nc" id="L10">    BusinessLogicAPIImpl (PersistenceAPI persistenceAPI) {</span>
+<span class="nc" id="L11">        this.persistenceAPI = persistenceAPI;</span>
+<span class="nc" id="L12">    }</span>
+
+    @Override
+    public PlaneManager getPlaneManager() {
+<span class="nc" id="L16">        return new PlaneManager ();</span>
+    }
+
+    @Override
+    public FlightManager getFlightManager() {
+<span class="nc" id="L21">        return new FlightManager();</span>
+    }
+
+    @Override
+    public AirportManager getAirportManager() {
+<span class="nc" id="L26">        return new AirportManagerImpl();</span>
+    }
+
+    public DiscountManager getDiscountManager() {
+<span class="nc" id="L30">        return new DiscountManagerImpl();</span>
+    }
+
+    @Override
+    public UserManager getUserManager() {
+<span class="nc" id="L35">        return new UserManagerImpl();</span>
+    }
+
+    @Override
+    public BookingManager getBookingManager() {
+<span class="nc" id="L40">        return new BookingManager();</span>
+    }
+
+    @Override
+    public PassengerManager getPassengerManager() {
+<span class="nc" id="L45">        return new PassengerManager();</span>
+    }
+
+    @Override
+    public ExtrasManager getExtrasManager() {
+<span class="nc" id="L50">        return new ExtrasManager();</span>
+    }
+
+    @Override
+    public BookingNonDAO getBookingNonDAO() {
+<span class="nc" id="L55">        return this.persistenceAPI.getSecondaryBookingStorageService();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

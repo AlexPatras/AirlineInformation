@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiscountManagerImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">DiscountManagerImpl.java</span></div><h1>DiscountManagerImpl.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import persistence.*;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Class which applies dynamic discount to either specific flight or to a bunch of flights and also calculates the price of newly created booking
+ */
+<span class="fc" id="L13">public class DiscountManagerImpl implements DiscountManager {</span>
+
+<span class="fc" id="L15">    private final FlightNonDAO flightNonDAO = new FlightNonDAOImpl();</span>
+<span class="fc" id="L16">    private final BookingNonDAO bookingNonDAO = new BookingNonDAOImpl();</span>
+<span class="fc" id="L17">    private final BookingFlightNonDAO bookingFlightNonDAO = new BookingFlightNonDAOImpl();</span>
+<span class="fc" id="L18">    private final FlightDiscountNonDAO flightDiscountNonDAO = new FlightDiscountNonDAOImpl();</span>
+<span class="fc" id="L19">    private final APIClient apiClient = new APIClientImpl();</span>
+    /**
+     * Applies discount to all flights with same arrival city, depending on what airport name is passed.
+     * @param destination represents the name of location to which the discount will be applied (All flights with
+     * this destination set as their arrival place will get a discount
+     * @param discountMode determines based on what the discount should be calculated
+     */
+    @Override
+    public void applyDiscountToLocation(String destination, String discountMode) throws DiscountNotAppliedException, DiscountDatabaseException {
+<span class="pc bpc" id="L28" title="3 of 8 branches missed.">        if (discountMode == null || discountMode.equals(&quot;&quot;) || destination == null || destination.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L29">            throw new DiscountNotAppliedException(&quot;Discount cannot be calculated because of the lack of parameters for it&quot;);</span>
+        }
+<span class="fc" id="L31">            HashMap&lt;Integer, Integer&gt; flightIdsAndPrices = this.flightNonDAO.getFlightIdsAndPrices(destination);</span>
+<span class="fc" id="L32">            List&lt;Double&gt; coordinates = apiClient.getCoordinates(destination);</span>
+
+<span class="fc" id="L34">            String lat = String.valueOf(coordinates.get(0));</span>
+<span class="fc" id="L35">            String lon = String.valueOf(coordinates.get(1));</span>
+
+<span class="fc" id="L37">            LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L38">            LocalDate yesterday = today.minusDays(1);</span>
+
+<span class="fc" id="L40">            double weatherCalculatedPrice = apiClient.fetchWeather(lat, lon, yesterday, discountMode);</span>
+<span class="fc" id="L41">            double percentage = weatherCalculatedPrice / 100;</span>
+<span class="fc" id="L42">            double discountPercentage = Math.round(percentage * 10.0) / 10.0;</span>
+
+<span class="fc" id="L44">            HashMap&lt;Integer, Integer&gt; bookingIdsAndPrices = this.bookingNonDAO.getBookingIdsAndPrices(flightIdsAndPrices);</span>
+<span class="fc" id="L45">            HashMap&lt;Integer, Integer&gt; bookingAndFlightIds = this.bookingFlightNonDAO.getBookingAndFlightIds(flightIdsAndPrices);</span>
+<span class="fc" id="L46">            this.bookingNonDAO.updateBookingPrices(bookingAndFlightIds, flightIdsAndPrices, bookingIdsAndPrices, discountPercentage);</span>
+<span class="fc" id="L47">            this.flightDiscountNonDAO.updateCurrentDiscounts(flightIdsAndPrices);</span>
+<span class="fc" id="L48">    }</span>
+
+
+    /**
+     * Applies discount to a specific flight, based on flight id that is passed.
+     * @param flightId determines which flight will have a discount applied
+     * @param discountMode determines based on what the discount should be calculated
+     * @throws DiscountNotAppliedException if exception type of DiscountDatabaseException is caught
+     */
+    @Override
+    public void applyDiscountToFlight(int flightId, String discountMode) throws DiscountDatabaseException, DiscountNotAppliedException {
+<span class="pc bpc" id="L59" title="1 of 4 branches missed.">        if (discountMode == null || discountMode.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L60">            throw new DiscountNotAppliedException(&quot;Discount cannot be calculated because of the lack of parameters for it&quot;);</span>
+        }
+<span class="fc" id="L62">            Map&lt;Integer, List&lt;String&gt;&gt; flightInfo = this.flightNonDAO.checkFlightForDiscount(flightId);</span>
+<span class="fc" id="L63">            HashMap&lt;Integer, Integer&gt; flightIdAndPrice = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L64">            String location = flightInfo.get(flightId).get(0);</span>
+
+<span class="fc" id="L66">            int price = Integer.parseInt(flightInfo.get(flightId).get(1));</span>
+<span class="fc" id="L67">            System.out.println(&quot;price of flight &quot; + flightId + &quot;: &quot; + price);</span>
+
+<span class="fc" id="L69">            flightIdAndPrice.put(flightId, price);</span>
+
+<span class="fc" id="L71">            List&lt;Double&gt; coordinates = apiClient.getCoordinates(location);</span>
+
+<span class="fc" id="L73">            String lat = String.valueOf(coordinates.get(0));</span>
+<span class="fc" id="L74">            String lon = String.valueOf(coordinates.get(1));</span>
+<span class="fc" id="L75">            LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L76">            LocalDate yesterday = today.minusDays(1);</span>
+
+<span class="fc" id="L78">            double weatherCalculatedPrice = apiClient.fetchWeather(lat, lon, yesterday, discountMode);</span>
+<span class="fc" id="L79">            double percentage = weatherCalculatedPrice / 100;</span>
+<span class="fc" id="L80">            double discountPercentage = Math.round(percentage * 10.0) / 10.0;</span>
+
+<span class="fc" id="L82">            HashMap&lt;Integer, Integer&gt; bookingIdsAndPrices = this.bookingNonDAO.getBookingIdsAndPrices(flightIdAndPrice);</span>
+<span class="fc" id="L83">            HashMap&lt;Integer, Integer&gt; bookingAndFlightIds = this.bookingFlightNonDAO.getBookingAndFlightIds(flightIdAndPrice);</span>
+<span class="fc" id="L84">            this.bookingNonDAO.updateBookingPrices(bookingAndFlightIds, flightIdAndPrice, bookingIdsAndPrices, discountPercentage);</span>
+<span class="fc" id="L85">            this.flightDiscountNonDAO.updateCurrentDiscounts(flightIdAndPrice);</span>
+<span class="fc" id="L86">    }</span>
+
+    @Override
+    public void staticApplyDiscountToFlight(int flightId, String discountMode) throws DiscountDatabaseException, DiscountNotAppliedException {
+
+<span class="nc" id="L91">    }</span>
+
+
+    /**
+     * Produces a distinct list of flight arrival places
+     * @return a list of Strings with various location names
+     * @throws DiscountDatabaseException if exception type of DiscountDatabaseException is caught
+     */
+    @Override
+    public List&lt;String&gt; getFlightLocations() throws DiscountDatabaseException {
+<span class="nc" id="L101">            return flightNonDAO.getFlightDestinations();</span>
+    }
+
+    /**
+     * Calculates price of certain booking. Checks if booking has flight which is being discounted.
+     * @param flightId gives information about which flight should be looked for
+     * @throws DiscountDatabaseException if exception type of DiscountDatabaseException is caught
+     */
+    @Override
+    public void calculatePrice(int bookingId, int flightId) throws DiscountNotAppliedException, DiscountDatabaseException, BookingPersistenceException{
+<span class="fc" id="L111">            String discountMode = &quot;Sun hours&quot;; HashMap&lt;Integer, Integer&gt; flightIdAndPrice = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L112">            HashMap&lt;Integer, List&lt;String&gt;&gt; flightInfo = this.flightNonDAO.checkIfFlightHasDiscount(flightId);</span>
+            String location;
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">            if (flightInfo.isEmpty()) {</span>
+<span class="nc" id="L115">                flightInfo = this.flightNonDAO.getSingleFlightInfo(flightId);</span>
+<span class="nc" id="L116">                int flightPrice = Integer.parseInt(flightInfo.get(flightId).get(1));</span>
+<span class="nc" id="L117">                flightPrice += bookingNonDAO.getDefaultBookingPrice(bookingId);</span>
+<span class="nc" id="L118">                flightIdAndPrice.put(flightId, flightPrice);</span>
+<span class="nc" id="L119">                bookingNonDAO.calculateSingleBookingPrice(bookingId, flightPrice);</span>
+<span class="nc" id="L120">            } else {</span>
+<span class="fc" id="L121">                int flightPrice = Integer.parseInt(flightInfo.get(flightId).get(1));</span>
+<span class="fc" id="L122">                location = flightInfo.get(flightId).get(0);</span>
+<span class="fc" id="L123">                flightIdAndPrice.put(flightId, flightPrice);</span>
+<span class="fc" id="L124">                List&lt;Double&gt; coordinates = apiClient.getCoordinates(location);</span>
+<span class="fc" id="L125">                String lat = String.valueOf(coordinates.get(0));</span>
+<span class="fc" id="L126">                String lon = String.valueOf(coordinates.get(1));</span>
+<span class="fc" id="L127">                LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L128">                LocalDate yesterday = today.minusDays(1);</span>
+
+<span class="fc" id="L130">                double weatherCalculatedPercentage = apiClient.fetchWeather(lat, lon, yesterday, discountMode);</span>
+<span class="fc" id="L131">                double percentage = weatherCalculatedPercentage / 100;</span>
+<span class="fc" id="L132">                double discountPercentage = Math.round(percentage * 10.0) / 10.0;</span>
+
+<span class="fc" id="L134">                int finalPrice = (int) ((flightPrice) * (1 - discountPercentage));</span>
+
+<span class="fc" id="L136">                finalPrice += bookingNonDAO.getDefaultBookingPrice(bookingId);</span>
+
+<span class="fc" id="L138">                bookingNonDAO.calculateSingleBookingPrice(bookingId, finalPrice);</span>
+
+            }
+<span class="fc" id="L141">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

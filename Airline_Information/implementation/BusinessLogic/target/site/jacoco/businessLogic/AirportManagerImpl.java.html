@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AirportManagerImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">AirportManagerImpl.java</span></div><h1>AirportManagerImpl.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import dataRecords.AirportData;
+import persistence.AirportDAO;
+import persistence.DBController;
+
+public class AirportManagerImpl implements AirportManager {
+    private AirportDAO airportDAO;
+<span class="fc" id="L14">    private DataSource db = DBController.getDataSource(&quot;db&quot;);</span>
+
+<span class="fc" id="L16">    public AirportManagerImpl() {</span>
+<span class="fc" id="L17">    }</span>
+
+    public void add(AirportData airportData) throws SQLException{
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if (airportData.iata().isEmpty()) {</span>
+<span class="nc" id="L21">            throw new IllegalArgumentException(&quot;IATA cannot be empty&quot;);</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        } else if (airportData.city().isEmpty()) {</span>
+<span class="nc" id="L23">            throw new IllegalArgumentException(&quot;City cannot be empty&quot;);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        } else if (airportData.country().isEmpty()) {</span>
+<span class="nc" id="L25">            throw new IllegalArgumentException(&quot;Country cannot be empty&quot;);</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        } else if (airportData.iata().length() != 3) {</span>
+<span class="nc" id="L27">            throw new IllegalArgumentException(&quot;IATA must be 3 characters long&quot;);</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        } else if (getAllAirports().contains(airportData.iata())) {</span>
+<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Duplicate entry&quot;);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        } else if (airportData.iata().matches(&quot;.*\\d.*&quot;)) {</span>
+<span class="nc" id="L31">            throw new IllegalArgumentException(&quot;IATA Number&quot;);</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        } else if (airportData.city().matches(&quot;.*\\d.*&quot;)) {</span>
+<span class="nc" id="L33">            throw new IllegalArgumentException(&quot;City Number&quot;);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        } else if (airportData.country().matches(&quot;.*\\d.*&quot;)) {</span>
+<span class="nc" id="L35">            throw new IllegalArgumentException(&quot;Country Number&quot;);</span>
+        }
+
+<span class="fc" id="L38">        airportDAO.storeAirport(airportData, db);</span>
+<span class="fc" id="L39">    }</span>
+
+    public List&lt;AirportData&gt; getAllAirports() throws SQLException {
+<span class="fc" id="L42">        return airportDAO.getAllAirports();</span>
+    }
+
+    // for testing purposes
+    public void setAirportDAO(AirportDAO newAirportDao) {
+<span class="fc" id="L47">        this.airportDAO = newAirportDao;</span>
+<span class="fc" id="L48">    }</span>
+
+    // for testing purposes
+    public void setDataSource(DataSource db) {
+<span class="fc" id="L52">        this.db = db;</span>
+<span class="fc" id="L53">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookingManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">BookingManager.java</span></div><h1>BookingManager.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import java.util.regex.Pattern;
+
+import dataRecords.BookingData;
+import persistence.BookingDAO;
+import persistence.BookingNonDAO;
+import persistence.BookingNonDAOImpl;
+import persistence.BookingPersistenceException;
+import persistence.DAO;
+import persistence.InputValidationException;
+
+<span class="fc" id="L13">public class BookingManager {</span>
+
+<span class="fc" id="L15">    private DAO&lt;BookingData&gt; bookingDAO = new BookingDAO();</span>
+<span class="fc" id="L16">    private BookingNonDAO bookingNonDAO = new BookingNonDAOImpl();</span>
+
+    public void create(Booking booking) throws BookingPersistenceException, InputValidationException {
+
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (booking.getFlightID() == 0) {</span>
+<span class="fc" id="L21">            throw new InputValidationException(&quot;Provide the flight id.&quot;);</span>
+        } else {
+            try {
+<span class="fc" id="L24">                bookingDAO.create(booking.getBookingData());</span>
+<span class="fc" id="L25">            } catch (BookingPersistenceException e) {</span>
+<span class="fc" id="L26">                throw new BookingPersistenceException(&quot;BL: Couldn't create booking.&quot;, e);</span>
+<span class="nc" id="L27">            } catch (InputValidationException e) {</span>
+<span class="nc" id="L28">                throw new BookingPersistenceException(&quot;BL: Couldn't create booking.&quot;, e);</span>
+<span class="nc" id="L29">            } catch (Exception e) {</span>
+<span class="nc" id="L30">                throw new BookingPersistenceException(&quot;BL: Couldn't create booking.&quot;, e);</span>
+<span class="fc" id="L31">            }</span>
+        }
+
+<span class="fc" id="L34">    }</span>
+
+    public BookingData read(int id) throws BookingPersistenceException {
+        try {
+<span class="nc" id="L38">            return bookingDAO.read(id);</span>
+<span class="nc" id="L39">        } catch (BookingPersistenceException e) {</span>
+<span class="nc" id="L40">            throw new BookingPersistenceException(&quot;Couldn't get booking information.&quot;, e);</span>
+<span class="nc" id="L41">        } catch (Exception e) {</span>
+<span class="nc" id="L42">            throw new BookingPersistenceException(&quot;Couldn't get booking information.&quot;, e);</span>
+        }
+    }
+
+    public void setBookingDAO(BookingDAO bookingDAO) {
+<span class="fc" id="L47">        this.bookingDAO = bookingDAO;</span>
+<span class="fc" id="L48">    }</span>
+
+    public static boolean isValidEmail(String email) {
+<span class="nc" id="L51">        String emailRegex = &quot;^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$&quot;;</span>
+<span class="nc" id="L52">        Pattern pattern = Pattern.compile(emailRegex);</span>
+<span class="nc" id="L53">        return pattern.matcher(email).matches();</span>
+    }
+
+    public int getDefaultBookingPrice(int id) throws BookingPersistenceException {
+        try {
+<span class="nc" id="L58">            return bookingNonDAO.getDefaultBookingPrice(id);</span>
+<span class="nc" id="L59">        } catch (BookingPersistenceException e) {</span>
+<span class="nc" id="L60">            throw new BookingPersistenceException(&quot;Couldn't get default booking price.&quot;, e);</span>
+        }
+    }
+
+    public int getInsertedBookingId() throws BookingPersistenceException {
+        try {
+<span class="nc" id="L66">            return bookingNonDAO.getInsertedBookingId();</span>
+<span class="nc" id="L67">        } catch (BookingPersistenceException e) {</span>
+<span class="nc" id="L68">            throw new BookingPersistenceException(&quot;Couldn't get inserted booking ID.&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

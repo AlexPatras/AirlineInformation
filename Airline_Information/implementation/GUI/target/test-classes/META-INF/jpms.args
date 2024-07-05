@@ -1,0 +1,4 @@
+--patch-module
+gui_module=_
+--add-reads
+gui_module=ALL-UNNAMED

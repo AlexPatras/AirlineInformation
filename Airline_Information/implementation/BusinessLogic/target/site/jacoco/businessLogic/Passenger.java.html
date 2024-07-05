@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Passenger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">Passenger.java</span></div><h1>Passenger.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import dataRecords.PassengerData;
+
+public class Passenger {
+    private PassengerData passengerData;
+
+<span class="fc" id="L8">    public Passenger(PassengerData passengerData) {</span>
+<span class="fc" id="L9">        this.passengerData = passengerData;</span>
+<span class="fc" id="L10">    }</span>
+
+    public String getFirstName() {
+<span class="fc" id="L13">        return this.passengerData.firstName();</span>
+    }
+
+    public String getLastName() {
+<span class="fc" id="L17">        return this.passengerData.lastName();</span>
+    }
+
+    public String getEmail() {
+<span class="fc" id="L21">        return this.passengerData.email();</span>
+    }
+
+    public int getPassengerId() {
+<span class="fc" id="L25">        return this.passengerData.passengerId();</span>
+    }
+
+    public String getPhoneNumber() {
+<span class="fc" id="L29">        return this.passengerData.phoneNumber();</span>
+    }
+
+    public String getNationality() {
+<span class="fc" id="L33">        return this.passengerData.nationality();</span>
+    }
+
+    public String getDocNumber() {
+<span class="fc" id="L37">        return this.passengerData.docNumber();</span>
+    }
+
+    public String getBirthDay() {
+<span class="fc" id="L41">        return this.passengerData.birthDay();</span>
+    }
+
+    public Passenger setPassengerId(int id) {
+<span class="fc" id="L45">        return new Passenger(new PassengerData(getFirstName(), getLastName(), getEmail(), id, getPhoneNumber(),</span>
+<span class="fc" id="L46">                getNationality(), getDocNumber(), getBirthDay()));</span>
+    }
+
+    public PassengerData getPassengerData() {
+<span class="fc" id="L50">        return this.passengerData;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L55">        return &quot;First name: &quot; + this.passengerData.firstName() + &quot;, Last name: &quot; + this.passengerData.lastName()</span>
+<span class="nc" id="L56">                + &quot;, Email: &quot; + this.passengerData.email() + &quot;, ID: &quot; + this.passengerData.passengerId()</span>
+<span class="nc" id="L57">                + &quot;, Phone number: &quot; + this.passengerData.phoneNumber() + &quot;, Nationality: &quot;</span>
+<span class="nc" id="L58">                + this.passengerData.nationality() + &quot;, Document number: &quot; + this.passengerData.birthDay();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

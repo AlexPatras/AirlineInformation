@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExtrasManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">ExtrasManager.java</span></div><h1>ExtrasManager.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import java.util.ArrayList;
+
+import persistence.BookingNonDAO;
+import persistence.BookingNonDAOImpl;
+import persistence.BookingPersistenceException;
+import persistence.ExtrasNonDAO;
+import persistence.ExtrasNonDAOImpl;
+import persistence.ExtrasPersistenceException;
+
+<span class="fc" id="L12">public class ExtrasManager {</span>
+
+<span class="fc" id="L14">    private ExtrasNonDAO extrasNonDAO = new ExtrasNonDAOImpl();</span>
+<span class="fc" id="L15">    private BookingNonDAO bookingNonDAO = new BookingNonDAOImpl();</span>
+
+    public ArrayList&lt;Integer&gt; getExtrasIds(int flightId) throws ExtrasPersistenceException {
+        try {
+<span class="fc" id="L19">            return extrasNonDAO.getExtrasIds(flightId);</span>
+<span class="fc" id="L20">        } catch (ExtrasPersistenceException e) {</span>
+<span class="fc" id="L21">            throw new ExtrasPersistenceException(&quot;BL: Couldn't retrieve extras ids.&quot;, e);</span>
+        }
+    }
+
+    public Extras getExtras(int extrasId) throws ExtrasPersistenceException {
+        try {
+<span class="fc" id="L27">            return new Extras(extrasNonDAO.getExtras(extrasId));</span>
+<span class="fc" id="L28">        } catch (ExtrasPersistenceException e) {</span>
+<span class="fc" id="L29">            throw new ExtrasPersistenceException(&quot;BL: Couldn't retrieve extras.&quot;, e);</span>
+        }
+    }
+
+    public void createBookingExtras(int extrasId) throws ExtrasPersistenceException, BookingPersistenceException {
+        try {
+<span class="fc" id="L35">            extrasNonDAO.createBookingExtras(extrasId, bookingNonDAO.getInsertedBookingId());</span>
+<span class="fc" id="L36">        } catch (ExtrasPersistenceException e) {</span>
+<span class="fc" id="L37">            throw new ExtrasPersistenceException(&quot;BL: Couldn't add extras for this booking.&quot;, e);</span>
+<span class="nc" id="L38">        } catch (BookingPersistenceException e) {</span>
+<span class="nc" id="L39">            throw new BookingPersistenceException(&quot;BL: Couldn't get booking to add extras to.&quot;, e);</span>
+<span class="fc" id="L40">        }</span>
+<span class="fc" id="L41">    }</span>
+
+    public void setExtrasNonDao(ExtrasNonDAO extrasNonDAO) {
+<span class="fc" id="L44">        this.extrasNonDAO = extrasNonDAO;</span>
+<span class="fc" id="L45">    }</span>
+
+    public void setBookingNonDao(BookingNonDAO bookingNonDAO) {
+<span class="fc" id="L48">        this.bookingNonDAO = bookingNonDAO;</span>
+<span class="fc" id="L49">    }</span>
+
+    public int getExtrasPrice(int extrasId) throws ExtrasPersistenceException {
+        try {
+<span class="nc" id="L53">            return extrasNonDAO.getExtrasPrice(extrasId);</span>
+<span class="nc" id="L54">        } catch (ExtrasPersistenceException e) {</span>
+<span class="nc" id="L55">            throw new ExtrasPersistenceException(&quot;BL: Couldn't get extras price.&quot;, e);</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

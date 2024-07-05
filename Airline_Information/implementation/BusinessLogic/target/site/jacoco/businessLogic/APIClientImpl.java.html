@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>APIClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BusinessLogic</a> &gt; <a href="index.source.html" class="el_package">businessLogic</a> &gt; <span class="el_source">APIClientImpl.java</span></div><h1>APIClientImpl.java</h1><pre class="source lang-java linenums">package businessLogic;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.time.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Class for making API calls, accessing and retrieving weather data at certain location in certain point in time,
+ * also getting coordinates of a certain location based on its name
+ */
+<span class="fc" id="L21">public class APIClientImpl implements APIClient{</span>
+
+
+    /**
+     * Gets weather information (sun hours, clouds, etc.) in a certain location at specific timestamp. Makes an API call to OpenWeatherMap.org
+     * which provides all weather data in form of JSON
+     * @param lat represents latitude of a certain location in form of String
+     * @param lon represents longitude of a certain location in form of String
+     * @param date provides a timestamp for API call for when to look for weather
+     * @return sun hours of the destination in form of double
+     * @throws DiscountNotAppliedException if exception type of DiscountDatabaseException is caught
+     */
+    @Override
+    public double fetchWeather(String lat, String lon, LocalDate date, String discountMode) throws DiscountNotAppliedException {
+<span class="fc" id="L35">        double sunHours = -1;</span>
+<span class="fc" id="L36">        double clouds = -1;</span>
+
+<span class="fc" id="L38">        LocalDateTime localDateTime = date.atStartOfDay();</span>
+<span class="fc" id="L39">        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();</span>
+<span class="fc" id="L40">        long timestamp = instant.getEpochSecond();</span>
+
+<span class="fc" id="L42">        String unixDateFormat = String.valueOf(timestamp);</span>
+
+<span class="fc" id="L44">        String urlText = &quot;https://api.openweathermap.org/data/3.0/onecall/timemachine?lat=&quot; + lat + &quot;&amp;lon=&quot; + lon + &quot;&amp;dt=&quot; + unixDateFormat + &quot;&amp;appid=5eef0aada2edcbe8e50429f7a5528c14&quot;;</span>
+
+
+        try {
+<span class="fc" id="L48">            StringBuilder weather = new StringBuilder();</span>
+<span class="fc" id="L49">            URL url = new URL(urlText);</span>
+<span class="fc" id="L50">            URLConnection connection = url.openConnection();</span>
+<span class="fc" id="L51">            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));</span>
+            String line;
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L54">                weather.append(line);</span>
+            }
+<span class="fc" id="L56">            reader.close();</span>
+
+<span class="fc" id="L58">            Map&lt;String, Object&gt; mainMap = jsonToMap(weather.toString());</span>
+
+<span class="fc" id="L60">            List&lt;Map&lt;String, Object&gt;&gt; dataList = (List&lt;Map&lt;String, Object&gt;&gt;) mainMap.get(&quot;data&quot;);</span>
+<span class="fc" id="L61">            Map&lt;String, Object&gt; data1 = dataList.get(0);</span>
+<span class="fc" id="L62">            String sunriseUnixFormatString = data1.get(&quot;sunrise&quot;).toString();</span>
+<span class="fc" id="L63">            String sunsetUnixFormatString = data1.get(&quot;sunset&quot;).toString();</span>
+<span class="fc" id="L64">            String cloudPercentageString = data1.get(&quot;clouds&quot;).toString();</span>
+
+<span class="fc" id="L66">            double sunriseUnixFormatDouble = Double.parseDouble(sunriseUnixFormatString);</span>
+<span class="fc" id="L67">            double sunsetUnixFormatDouble = Double.parseDouble(sunsetUnixFormatString);</span>
+
+<span class="fc" id="L69">            long sunriseUnixFormat = Math.round(sunriseUnixFormatDouble);</span>
+<span class="fc" id="L70">            long sunsetUnixFormat = Math.round(sunsetUnixFormatDouble);</span>
+
+<span class="fc" id="L72">            sunHours = betweenInDouble(formatTime(sunriseUnixFormat), formatTime(sunsetUnixFormat));</span>
+<span class="fc" id="L73">            clouds = Double.parseDouble(cloudPercentageString);</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (clouds &gt; 30) {</span>
+<span class="fc" id="L76">                clouds = 30;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">            } else if (clouds &lt; 10) {</span>
+<span class="fc" id="L78">                clouds = 10;</span>
+            }
+
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (discountMode.equals(&quot;Sun hours&quot;)) {</span>
+<span class="fc" id="L82">                return sunHours;</span>
+            } else {
+<span class="nc" id="L84">                return clouds;</span>
+            }
+
+<span class="nc" id="L87">        } catch (IOException e) {</span>
+<span class="nc" id="L88">            throw new DiscountNotAppliedException(&quot;Problem occurred while fetching weather data&quot;);</span>
+        }
+
+    }
+
+
+    /**
+     * Gets coordinates (latitude and longitude) of any place based on city name.
+     * Makes an API call to google maps geocoding API to retrieve data. API call returns data in JSON format
+     * @param location is the name of city (or more specific location) to be put in API call.
+     * @return list of two coordinates in form of double
+     * @throws DiscountNotAppliedException if exception type of DiscountDatabaseException is caught
+     */
+    @Override
+    public List&lt;Double&gt; getCoordinates(String location) throws DiscountNotAppliedException {
+<span class="fc" id="L103">        ArrayList&lt;Double&gt; coordinates = new ArrayList&lt;&gt;();</span>
+
+        String fixedLocation;
+<span class="fc" id="L106">        char firstLetter = location.charAt(0);</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (Character.isLowerCase(firstLetter)) {</span>
+<span class="nc" id="L108">            firstLetter = Character.toUpperCase(firstLetter);</span>
+<span class="nc" id="L109">            fixedLocation = firstLetter + location.substring(1);</span>
+        } else {
+<span class="fc" id="L111">            fixedLocation = location;</span>
+        }
+
+<span class="fc" id="L114">        String urlText = &quot;https://maps.googleapis.com/maps/api/geocode/json?address=&quot; + fixedLocation + &quot;&amp;key=AIzaSyDpC9G2mjP06wBarq_sC-NLYY9xaFfjmRs&quot;;</span>
+
+        try {
+<span class="fc" id="L117">            StringBuilder result = new StringBuilder();</span>
+<span class="fc" id="L118">            URL url = new URL(urlText);</span>
+<span class="fc" id="L119">            URLConnection connection = url.openConnection();</span>
+<span class="fc" id="L120">            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));</span>
+            String line;
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            while ((line = reader.readLine()) != null) {</span>
+<span class="fc" id="L123">                result.append(line);</span>
+            }
+<span class="fc" id="L125">            reader.close();</span>
+
+<span class="fc" id="L127">            Map&lt;String, Object&gt; mainMap = jsonToMap(result.toString());</span>
+
+<span class="fc" id="L129">            List&lt;Map&lt;String, Object&gt;&gt; dataList = (List&lt;Map&lt;String, Object&gt;&gt;) mainMap.get(&quot;results&quot;);</span>
+
+<span class="fc" id="L131">            double lat = 0;</span>
+<span class="fc" id="L132">            double lon = 0;</span>
+
+<span class="pc bpc" id="L134" title="2 of 4 branches missed.">            if (dataList != null &amp;&amp; !dataList.isEmpty()) {</span>
+<span class="fc" id="L135">                Map&lt;String, Object&gt; data1 = dataList.get(0);</span>
+<span class="fc" id="L136">                Map&lt;String, Object&gt; data2 = (Map&lt;String, Object&gt;) data1.get(&quot;geometry&quot;);</span>
+<span class="fc" id="L137">                Map&lt;String, Double&gt; data3 = (Map&lt;String, Double&gt;) data2.get(&quot;location&quot;);</span>
+
+<span class="fc" id="L139">                lat = data3.get(&quot;lat&quot;);</span>
+<span class="fc" id="L140">                lon = data3.get(&quot;lng&quot;);</span>
+
+<span class="pc bpc" id="L142" title="3 of 4 branches missed.">                if (lat != 0 || lon != 0) {</span>
+<span class="fc" id="L143">                    coordinates.add(lat);</span>
+<span class="fc" id="L144">                    coordinates.add(lon);</span>
+                }
+
+            }
+
+<span class="nc" id="L149">        } catch (IOException e) {</span>
+<span class="nc" id="L150">            throw new DiscountNotAppliedException(&quot;Problem occurred while fetching location coordinates&quot;);</span>
+<span class="fc" id="L151">        }</span>
+
+<span class="fc" id="L153">        return coordinates;</span>
+    }
+
+
+    // Helper methods
+
+    /**
+     * Converts time from Unix timestamp to LocalTime in hours and seconds
+     * @param unixTimeStamp passes the value of Unix timestamp to be converted
+     * @return time in hours and seconds in form of LocalTime
+     */
+    private LocalTime formatTime(long unixTimeStamp) {
+<span class="fc" id="L165">        Instant instant = Instant.ofEpochSecond(unixTimeStamp);</span>
+<span class="fc" id="L166">        ZoneId zoneId = ZoneId.systemDefault();</span>
+<span class="fc" id="L167">        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneId);</span>
+<span class="fc" id="L168">        return localDateTime.toLocalTime();</span>
+    }
+
+    /**
+     * Converts time period from hours and seconds to double format
+     * @param start is start of time period
+     * @param end is end of time period
+     * @return time in form of double
+     */
+    private double betweenInDouble(LocalTime start, LocalTime end) {
+<span class="fc" id="L178">        Duration duration = Duration.between(start, end);</span>
+<span class="fc" id="L179">        double seconds = duration.toSeconds();</span>
+<span class="fc" id="L180">        double hours = (double) (seconds / 60) / 60;</span>
+<span class="fc" id="L181">        hours = Math.round(hours * 100);</span>
+<span class="fc" id="L182">        hours = hours / 100;</span>
+<span class="fc" id="L183">        return hours;</span>
+    }
+
+    /**
+     * Helps to store data from JSON form to map with the assistance of GSON
+     * @param input is the input from JSON data source
+     * @return map of String and Object to store various data objects form JSON source
+     */
+    private static Map&lt;String, Object&gt; jsonToMap (String input) {
+<span class="fc" id="L192">        return new Gson().fromJson(input, new TypeToken&lt;HashMap&lt;String, Object&gt;&gt;() {}.getType());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
